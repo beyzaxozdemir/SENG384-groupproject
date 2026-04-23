@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Health AI Platform</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="navbar">
+  <span id="navTitle">Health AI Platform</span>
+  <button onclick="logout()" class="logout-btn">Logout</button>
+</div>
+
+<div class="container">
+
+  <div id="auth" class="card login-card">
+    <h2>Welcome Back</h2>
+    <p class="subtitle">Login to your account</p>
+
+    <label>Email</label>
+    <input id="email" placeholder="example@edu.tr">
+
+    <label>Role</label>
+    <select id="role">
+      <option>Engineer</option>
+      <option>Healthcare Professional</option>
+    </select>
+
+    <button onclick="login()">Login</button>
+
+    <p id="errorMsg"></p>
+  </div>
+
+  <div id="dashboard" style="display:none;">
+
+    <div class="card">
+      <h2>Create New Post</h2>
+
+      <label>Title</label>
+      <input id="title">
+
+      <label>Domain</label>
+      <input id="domain">
+
+      <label>City</label>
+      <input id="city">
+
+      <button onclick="addPost()">Create Post</button>
+    </div>
+
+    <div class="card">
+      <h2>All Posts</h2>
+
+      <input id="search" placeholder="Search by city..." onkeyup="filterPosts()">
+
+      <div id="postList"></div>
+    </div>
+
+  </div>
+
+</div>
+
+<script src="app.js"></script>
+
+</body>
+</html>
