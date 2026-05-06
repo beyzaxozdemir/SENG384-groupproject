@@ -1,28 +1,8 @@
-let posts = JSON.parse(localStorage.getItem("posts")) || [];
+let posts = [];
 
 function login() {
-  let email = document.getElementById("email").value.trim();
-  let role = document.getElementById("role").value;
-
-  let basicEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-  if (!basicEmail.test(email)) {
-    showError("Invalid email format!");
-    return;
-  }
-
-  if (!email.includes(".edu")) {
-    showError("Only university emails allowed!");
-    return;
-  }
-
-  localStorage.setItem("role", role);
-
   document.getElementById("auth").style.display = "none";
   document.getElementById("dashboard").style.display = "block";
-
-  document.getElementById("navTitle").innerText =
-    "Health AI Platform - " + role;
 }
 
 function logout() {
@@ -30,19 +10,13 @@ function logout() {
   document.getElementById("auth").style.display = "block";
 }
 
-function showError(msg) {
-  let error = document.getElementById("errorMsg");
-  error.innerText = msg;
-  error.style.display = "block";
+async function loadPosts() {
+  const res = await fetch("http://localhost:3000/posts");
+  posts = await res.json();
+  renderPosts();
 }
 
-function addPost() {
-  let role = localStorage.getItem("role");
-  if (role !== "Engineer") {
-    alert("Only engineers can create posts!");
-    return;
-  }
-
+async function addPost() {
   let title = document.getElementById("title").value;
   let domain = document.getElementById("domain").value;
   let city = document.getElementById("city").value;
@@ -52,15 +26,15 @@ function addPost() {
     return;
   }
 
-  let newPost = {
-    title,
-    domain,
-    city,
-    status: "Draft"
-  };
+  let newPost = { title, domain, city };
 
-  posts.push(newPost);
-  renderPosts();
+  await fetch("http://localhost:3000/posts", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(newPost)
+  });
+
+  loadPosts();
 
   document.getElementById("title").value = "";
   document.getElementById("domain").value = "";
@@ -85,28 +59,30 @@ function renderPosts() {
       <div class="actions">
         ${
           p.status === "Draft"
-            ? `<button class="btn-primary" onclick="publish(${index})">Publish</button>`
-            : `<button class="btn-secondary" disabled>Published</button>`
+            ? `<button onclick="publish(${index})">Publish</button>`
+            : `<button disabled>Published</button>`
         }
-        <button class="btn-danger" onclick="deletePost(${index})">Delete</button>
+        <button onclick="deletePost(${index})">Delete</button>
       </div>
     `;
 
     list.appendChild(div);
   });
-
-  localStorage.setItem("posts", JSON.stringify(posts));
 }
 
-function publish(i) {
-  posts[i].status = "Active";
-  renderPosts();
+async function publish(i) {
+  await fetch(`http://localhost:3000/posts/${i}`, {
+    method: "PATCH"
+  });
+  loadPosts();
 }
 
-function deletePost(i) {
-  if (confirm("Are you sure you want to delete this post?")) {
-    posts.splice(i, 1);
-    renderPosts();
+async function deletePost(i) {
+  if (confirm("Are you sure?")) {
+    await fetch(`http://localhost:3000/posts/${i}`, {
+      method: "DELETE"
+    });
+    loadPosts();
   }
 }
 
@@ -140,6 +116,4 @@ function filterPosts() {
     });
 }
 
-window.onload = function () {
-  renderPosts();
-};
+window.onload = loadPosts;
